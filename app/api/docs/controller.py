@@ -1,16 +1,18 @@
-from fastapi import BackgroundTasks, File, UploadFile
 import os
 import shutil
 
+from fastapi import BackgroundTasks, File, UploadFile
+
+from app.api.docs.schema import SyncResponse, UploadResponse
 from app.core.config import settings
 from app.services.indexer_service import sync_specific_file
 from app.services.knowledge_service import load_initial_knowledge
-from app.api.docs.schema import UploadResponse, SyncResponse
 
+DOCUMENT_UPLOAD = File(...)
 
 async def upload_document(
     background_tasks: BackgroundTasks,
-    file: UploadFile = File(...),
+    file: UploadFile = DOCUMENT_UPLOAD,
 ) -> UploadResponse:
     """Recebe um arquivo, salva no diretório base e manda indexar."""
 
@@ -21,7 +23,9 @@ async def upload_document(
 
     background_tasks.add_task(sync_specific_file, file_path)
 
-    return UploadResponse(message=f"Arquivo {file.filename} salvo e enviado para indexação.")
+    return UploadResponse(
+        message=f"Arquivo {file.filename} salvo e enviado para indexação.",
+    )
 
 
 async def trigger_vault_sync(background_tasks: BackgroundTasks, recreate: bool = False):

@@ -1,6 +1,7 @@
 from fastapi import APIRouter
-from app.api.docs.controller import upload_document, trigger_vault_sync
-from app.api.docs.schema import UploadResponse, SyncResponse
+
+from app.api.docs.controller import trigger_vault_sync, upload_document
+from app.api.docs.schema import SyncResponse, UploadResponse
 
 router = APIRouter()
 
