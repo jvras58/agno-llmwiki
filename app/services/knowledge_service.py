@@ -1,6 +1,6 @@
 import logging
 
-from app.knowledge.provider import wiki_knowledge
+from app.knowledge.provider import get_wiki_knowledge
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ def load_initial_knowledge(recreate: bool = False):
     logger.info("Iniciando a carga macro da base de conhecimento...")
 
     try:
-        wiki_knowledge.load(recreate=recreate)
+        get_wiki_knowledge().load(recreate=recreate)
         logger.info("Carga da base de conhecimento concluída com sucesso.")
     except Exception as e:
         logger.error(f"Falha ao carregar a base de conhecimento: {e}")

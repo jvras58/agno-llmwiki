@@ -3,7 +3,7 @@ from pathlib import Path
 
 from agno.knowledge.reader.markdown_reader import MarkdownReader
 
-from app.knowledge.provider import wiki_knowledge
+from app.knowledge.provider import get_wiki_knowledge
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ def sync_specific_file(file_path: str | Path):
         documents = reader.read(file=path)
 
         if documents:
-            wiki_knowledge.vector_db.upsert(documents)
+            get_wiki_knowledge().vector_db.upsert(documents)
             logger.info(f"Upsert concluído para {path.name}.")
 
     except Exception as e:
