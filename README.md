@@ -90,7 +90,7 @@ llm-wiki/
 ## ⚙️ Pré-requisitos
 
 *   [Docker](https://www.docker.com/) e Docker Compose instalados.
-*   [Ollama](https://ollama.com/) instalado na máquina host com o modelo de preferência baixado (ex: `ollama run llama3`).
+*   O serviço Ollama já vem incluso no `compose.yml` — não é obrigatório instalar nada na máquina host. Se preferir usar uma instância de Ollama já rodando localmente, basta apontar `OLLAMA_HOST` para ela (ver seção de variáveis de ambiente).
 
 ## 🛠️ Configuração e Execução
 
@@ -104,8 +104,9 @@ DEBUG=True
 
 # Configurações do Modelo
 LLM_MODEL="llama3"
-# Use [http://host.docker.internal:11434](http://host.docker.internal:11434) se o Ollama estiver rodando nativamente na sua máquina (fora do Docker)
-OLLAMA_HOST="[http://host.docker.internal:11434](http://host.docker.internal:11434)"
+# Padrão: aponta para o serviço Ollama do docker-compose.
+# Se quiser usar um Ollama nativo rodando na máquina host, troque por http://host.docker.internal:11434
+OLLAMA_HOST="http://ollama:11434"
 
 # Mapeamento do Diretório do Obsidian
 VAULT_PATH="C:/Caminho/Para/Seu/Obsidian/Vault" # Substitua pelo seu caminho real
@@ -114,7 +115,7 @@ VAULT_INTERNAL_PATH="/app/vault"
 
 ### 2. Subindo a Infraestrutura
 
-Utilize o Docker Compose para fazer o build via `uv` e subir o Banco de Dados, a API e o Worker simultaneamente:
+Utilize o Docker Compose para fazer o build via `uv` e subir o Banco de Dados, o servidor LLM, a API e o Worker simultaneamente:
 
 ```bash
 docker compose up --build
@@ -122,8 +123,19 @@ docker compose up --build
 
 **Serviços iniciados:**
 *   `db` (PgVector) na porta `5432`
+*   `ollama` (servidor LLM local) na porta `11434`
 *   `api` (FastAPI) na porta `8000` -> Acesse a documentação em `http://localhost:8000/docs`
 *   `watcher` (Worker) rodando em background aguardando modificações no disco.
+
+### 3. Baixando o modelo no Ollama
+
+O container do Ollama sobe vazio. Antes de fazer a primeira chamada ao endpoint de chat, baixe o modelo configurado em `LLM_MODEL` (ex: `llama3`) — ele será persistido no volume `ollama_data`, então o pull só precisa ser feito uma vez:
+
+```bash
+docker compose exec ollama ollama pull llama3
+```
+
+Substitua `llama3` pelo modelo que você definiu em `LLM_MODEL`. Para listar o que já está baixado: `docker compose exec ollama ollama list`.
 
 ## 📡 Endpoints Principais
 

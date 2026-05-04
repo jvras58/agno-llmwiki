@@ -17,6 +17,21 @@ services:
       timeout: 5s
       retries: 5
 
+  # Servidor LLM local (Ollama) docker compose exec ollama ollama pull llama3
+  ollama:
+    image: ollama/ollama:latest
+    container_name: nexus_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
   # API Principal do Nexus
   api:
     build: .
@@ -25,13 +40,16 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      ollama:
+        condition: service_healthy
     ports:
       - "8000:8000"
     env_file: .env
     volumes:
       - ${VAULT_PATH}:/app/vault
     environment:
-      - ${DB_URL_VECTORDB:-postgresql+psycopg://ai:ai@db:5432/ai}
+      - DB_URL_VECTORDB=${DB_URL_VECTORDB:-postgresql+psycopg://ai:ai@db:5432/ai}
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://ollama:11434}
 
   # Worker que vigia as mudanças no Obsidian
   watcher:
@@ -41,11 +59,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      ollama:
+        condition: service_healthy
     env_file: .env
     volumes:
       - ${VAULT_PATH}:/app/vault
     environment:
-      - ${DB_URL_VECTORDB:-postgresql+psycopg://ai:ai@db:5432/ai}
+      - DB_URL_VECTORDB=${DB_URL_VECTORDB:-postgresql+psycopg://ai:ai@db:5432/ai}
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://ollama:11434}
 
 volumes:
   postgres_data:
+  ollama_data:
