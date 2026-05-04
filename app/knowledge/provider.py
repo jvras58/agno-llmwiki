@@ -4,10 +4,9 @@ from agno.vectordb.pgvector import PgVector
 
 from app.core.config import settings
 
+# data_dir = settings.vault_path
+
 wiki_knowledge = Knowledge(
-    data_dir=settings.vault_path,
-    db_url_vectordb=settings.db_url_vectordb,
-    embedder_model=settings.embedder_model,
     vector_db=PgVector(
         db_url=settings.db_url_vectordb,
         table_name="wiki_embeddings",
