@@ -1,0 +1,51 @@
+services:
+  # Banco de dados com suporte a Vetores (pgvector)
+  db:
+    image: ankane/pgvector:latest
+    container_name: nexus_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER:-ai}
+      POSTGRES_PASSWORD: ${DB_PASS:-ai}
+      POSTGRES_DB: ${DB_NAME:-ai}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ai"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # API Principal do Nexus
+  api:
+    build: .
+    container_name: nexus_api
+    command: python -m app.main
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - ${VAULT_PATH}:/app/vault
+    environment:
+      - ${DB_URL_VECTORDB:-postgresql+psycopg://ai:ai@db:5432/ai}
+
+  # Worker que vigia as mudanças no Obsidian
+  watcher:
+    build: .
+    container_name: nexus_watcher
+    command: python -m app.workers.vault_watcher
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    volumes:
+      - ${VAULT_PATH}:/app/vault
+    environment:
+      - ${DB_URL_VECTORDB:-postgresql+psycopg://ai:ai@db:5432/ai}
+
+volumes:
+  postgres_data:
