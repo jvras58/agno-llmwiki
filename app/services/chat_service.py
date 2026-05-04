@@ -1,7 +1,9 @@
 import logging
+
 from app.agents.wiki_agent import create_wiki_agent
 
 logger = logging.getLogger(__name__)
+
 
 class ChatService:
     def __init__(self):
@@ -13,7 +15,7 @@ class ChatService:
         Recebe a mensagem da API, processa com o agente Nexus e retorna o texto.
         """
         logger.info(f"Processando mensagem: {message[:50]}...")
-        
+
         try:
             response = self.agent.run(message)
             return response.content

@@ -1,7 +1,10 @@
 
 import os
+
 from agno.tools.file import FileTools
+
 from app.core.config import settings
+
 
 def get_custom_tools() -> list:
     """
@@ -10,9 +13,9 @@ def get_custom_tools() -> list:
     """
     memory_dir = os.path.join(settings.vault_path, "memoria")
     os.makedirs(memory_dir, exist_ok=True)
-    
+
     wiki_file_tools = FileTools(
         base_dir=settings.vault_path
     )
-    
+
     return [wiki_file_tools]
